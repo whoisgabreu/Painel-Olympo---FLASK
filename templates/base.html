@@ -33,3 +33,29 @@
     </div>
   </body>
 </html>
+
+
+<script>
+    // Funções de "Selecionar Todos"
+    function setupSelectAll(selectAllId, checkboxClass) {
+        const selectAll = document.getElementById(selectAllId);
+        const checkboxes = document.querySelectorAll('.' + checkboxClass);
+        
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+            
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const total = checkboxes.length;
+                    const checked = document.querySelectorAll('.' + checkboxClass + ':checked').length;
+                    selectAll.checked = (total === checked);
+                });
+            });
+        }
+    }
+
+    setupSelectAll('select-all-clients', 'cliente-checkbox');
+    setupSelectAll('select-all-months', 'mes-checkbox');
+</script>

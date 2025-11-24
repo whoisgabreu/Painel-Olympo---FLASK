@@ -320,6 +320,26 @@ def agente():
 WEBHOOK_OPORTUNIDADES = "https://n8n.v4lisboatech.com.br/webhook/painel-olympo/oportunidades"
 
 # Adicione esta função após prepare_dataframes
+# def fetch_oportunidades():
+#     resp = requests.get(WEBHOOK_OPORTUNIDADES, timeout=20)
+#     data = resp.json()
+#     df = pd.DataFrame(data)
+    
+#     # Renomear colunas
+#     df = df.rename(columns={
+#         "nome_do_cliente": "cliente",
+#         "faturamento_monitorado_ou_previsivel": "tem_faturamento",
+#         "cliente_tem_maturidade_para_variavel": "maturidade",
+#         "aumento_de_performance_ultimos_3_meses": "crescimento",
+#         "status_do_cliente": "status",
+#         "step_atual_do_cliente": "step",
+#         "oportunidade_de_monetizacao_mapeada": "oportunidades",
+#         "alguma_objecao_de_preco_em_relacao_a_outros_produtos": "objeções",
+#     })
+
+
+#     return df
+
 def fetch_oportunidades():
     resp = requests.get(WEBHOOK_OPORTUNIDADES, timeout=20)
     data = resp.json()
@@ -336,7 +356,26 @@ def fetch_oportunidades():
         "oportunidade_de_monetizacao_mapeada": "oportunidades",
         "alguma_objecao_de_preco_em_relacao_a_outros_produtos": "objeções",
     })
-    
+
+    # -----------------------------
+    # NORMALIZAÇÃO COMPLETA
+    # -----------------------------
+
+    # Corrige casos específicos
+    df["status"] = df["status"].replace({
+        "⚫Aviso Prévio": "⚫ Aviso Prévio",
+        "⚫  Aviso Prévio": "⚫ Aviso Prévio",
+    })
+
+    # Remove espaços extras
+    df["status"] = df["status"].astype(str).str.strip()
+    df["step"] = df["step"].astype(str).str.strip()
+    df["maturidade"] = df["maturidade"].astype(str).str.strip()
+    df["crescimento"] = df["crescimento"].astype(str).str.strip()
+
+    # Normalização unificada
+    df["status_norm"] = df["status"].apply(normalize_status)
+
     return df
 
 def normalize_status(s):
@@ -524,6 +563,13 @@ def potencial_crescimento():
     )
     
     # Converter DataFrame para HTML table
+
+    print(df_filtrado)
+
+    colunas_para_remover = ["createdAt", "updatedAt", "status_norm", "id"]
+
+    df_filtrado = df_filtrado.drop(columns=colunas_para_remover, errors="ignore")
+
     df_table = df_filtrado.to_html(classes='data-table', index=False, escape=False)
     
     return render_template(
@@ -548,4 +594,4 @@ def potencial_crescimento():
 # RUN
 # -----------------------------
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5001)
+    app.run("0.0.0.0", port=5001, debug=True)
