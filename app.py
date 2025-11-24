@@ -564,8 +564,6 @@ def potencial_crescimento():
     
     # Converter DataFrame para HTML table
 
-    print(df_filtrado)
-
     colunas_para_remover = ["createdAt", "updatedAt", "status_norm", "id"]
 
     df_filtrado = df_filtrado.drop(columns=colunas_para_remover, errors="ignore")
@@ -594,4 +592,4 @@ def potencial_crescimento():
 # RUN
 # -----------------------------
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5001, debug=True)
+    app.run("0.0.0.0", port=5001)
