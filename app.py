@@ -789,6 +789,10 @@ def classificacao():
 
     return render_template("classificacao_form.html", criterios=criterios)
 
+@app.route('/apresentacao')
+def apresentacao():
+    return render_template("apresentacao.html")
+
 # -----------------------------
 # RUN
 # -----------------------------
