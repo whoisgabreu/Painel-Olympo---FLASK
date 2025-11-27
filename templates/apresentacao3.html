@@ -6,9 +6,7 @@
 <title>Apresentação – Resultados Olympo</title>
 
 <style>
-/* ========================================= */
-/* =========== CONFIG GLOBAL =============== */
-/* ========================================= */
+/* ===== CONFIG GLOBAL ===== */
 
 html {
     scroll-behavior: smooth;
@@ -20,13 +18,10 @@ body {
     background: #000;
     color: #fff;
     font-family: Arial, Helvetica, sans-serif;
-    transition: filter 0.3s ease;
 }
 
 
-/* ========================================= */
-/* ================ MENU LATERAL ============ */
-/* ========================================= */
+/* ===== MENU LATERAL ===== */
 
 .side-menu {
     position: fixed;
@@ -35,7 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 998;
+    z-index: 999;
 }
 
 .side-menu a {
@@ -55,9 +50,7 @@ body {
 }
 
 
-/* ========================================= */
-/* =================== SECTIONS ============ */
-/* ========================================= */
+/* ===== SECTIONS ===== */
 
 section {
     padding: 80px 8%;
@@ -84,9 +77,7 @@ ul {
 }
 
 
-/* ========================================= */
-/* ===================== HERO ============== */
-/* ========================================= */
+/* ===== HERO / LOGO ===== */
 
 .hero {
     text-align: center;
@@ -104,14 +95,13 @@ ul {
 }
 
 .img-ferramenta {
-    max-width: 100%;
-    border-radius: 10px;
+    max-width: 1000px;
+    display: block;
+    margin: 20px auto; /* centraliza horizontalmente */
+    max-width: 90%;    /* opcional: evita estourar o card */
+    border-radius: 10px; /* opcional: deixa mais bonito */
 }
-
-
-/* ========================================= */
-/* ============ MINI DASHBOARD ============= */
-/* ========================================= */
+/* ===== CARDS DO MINI DASH ===== */
 
 .mini-dash {
     display: grid;
@@ -124,10 +114,13 @@ ul {
     background: linear-gradient(145deg, #0b0b0b, #161616);
     padding: 28px;
     border-radius: 16px;
+
+    /* Novo estilo mais forte */
     border: 1px solid rgba(255, 0, 0, 0.2);
     box-shadow:
         0 3px 20px rgba(255, 0, 0, 0.18),
         inset 0 0 20px rgba(255, 0, 0, 0.08);
+
     transition: 0.35s ease;
 }
 
@@ -151,89 +144,37 @@ ul {
 }
 
 
-/* ========================================= */
-/* =================== CARDS =============== */
-/* ========================================= */
+/* ===== CARDS DAS DOBRAS ===== */
 
 .card {
     background: linear-gradient(145deg, #0b0b0b, #161616);
     padding: 45px;
     border-radius: 18px;
+
     border: 1px solid rgba(255, 0, 0, 0.25);
     box-shadow:
         0 3px 25px rgba(255, 0, 0, 0.18),
         inset 0 0 20px rgba(255, 0, 0, 0.10);
+
     transition: 0.35s;
     margin-top: 50px;
 }
 
 .card:hover {
     transform: translateY(-6px) scale(1.015);
+    box-shadow:
+        0 6px 35px rgba(255, 0, 0, 0.30),
+        inset 0 0 25px rgba(255, 0, 0, 0.15);
 }
 
-
-/* ========================================= */
-/* ======= BOTÕES DAS IMAGENS ============== */
-/* ========================================= */
-
-.btn-view {
-    background: #e02424;
-    border: none;
-    padding: 12px 18px;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    margin: 10px 0;
-    transition: 0.3s ease;
-    font-size: 16px;
-}
-
-.btn-view:hover {
-    background: #ff3a3a;
-    transform: scale(1.05);
-}
-
-
-/* ========================================= */
-/* ======== VIEWER FULLSCREEN ============== */
-/* ========================================= */
-
-.image-viewer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    justify-content: center;
-    align-items: center;
+.zoomed {
+    transform: scale(1.5) !important;
     z-index: 9999;
-    backdrop-filter: blur(6px);
+    position: relative;
+    transition: transform 0.4s ease;
 }
 
-.image-viewer img {
-    max-width: 90%;
-    max-height: 85%;
-    border-radius: 10px;
-    box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
-}
-
-.close-viewer {
-    position: absolute;
-    top: 25px;
-    right: 35px;
-    font-size: 36px;
-    font-weight: bold;
-    color: #ff3a3a;
-    cursor: pointer;
-}
-
-
-/* ========================================= */
-/* ============== RESPONSIVIDADE =========== */
-/* ========================================= */
+/* ===== RESPONSIVIDADE ===== */
 
 @media(max-width: 768px) {
     .side-menu {
@@ -258,13 +199,11 @@ ul {
     <a href="#dobra4">Como Movemos</a>
     <a href="#dobra5">Gaps</a>
 </div>
-
 <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo do Time" class="logo">
-
-
 
 <!-- HERO -->
 <section class="hero">
+
     <h1 style="font-size: 40px; color: #fff;">
         De zero estrutura a resultados reais em poucas semanas.
     </h1>
@@ -292,12 +231,7 @@ ul {
     </div>
 </section>
 
-
-
-<!-- ========================================= -->
-<!-- =============== DOBRA 1 ================= -->
-<!-- ========================================= -->
-
+<!-- DOBRA 1 -->
 <section id="dobra1">
     <div class="card">
         <h2>💥 O Impacto em Números</h2>
@@ -313,44 +247,41 @@ ul {
     </div>
 </section>
 
-
-
-<!-- ========================================= -->
-<!-- =============== DOBRA 2 ================= -->
-<!-- ========================================= -->
-
+<!-- DOBRA 2 -->
 <section id="dobra2">
     <div class="card">
-        <h2>🧭 Ferramentas do Projeto</h2>
+        <h2>🧭 As Ferramentas Oficiais do Projeto</h2>
 
         <h3 style="color:#fff;">🔮 Radar de Variável</h3>
         <p>Ferramenta própria criada como um quiz inteligente para qualificação profunda de clientes.</p>
 
-        <button class="btn-view" onclick="openViewer('static/images/radar-de-variavel.png')">
-            Ver Radar
-        </button>
-
-        <button class="btn-view" onclick="openViewer('static/images/resultado-status.png')">
-            Ver Resultado
-        </button>
-
-        <br><br>
+        <ul>
+            <li>Avalia capacidade, maturidade e abertura ao risco</li>
+            <li>Elimina achismo e traz diagnóstico numérico</li>
+            <li>Direciona energia apenas para prospects com real potencial</li>
+        </ul>
 
         <h3 style="color:#fff;">📊 Dashboard de Receita Variável</h3>
         <p>Painel estratégico para monitorar metas, evolução mensal e impacto financeiro do modelo variável.</p>
-
-        <button class="btn-view" onclick="openViewer('static/images/dashboard.png')">
-            Ver Dashboard
-        </button>
     </div>
+
+    <div class="card">
+        <h2>🔮 Radar de Variável</h2>
+        <img src="{{ url_for('static', filename='images/radar-de-variavel.png') }}" alt="Ferramenta Radar de Variável" class="img-ferramenta">
+        <img src="{{ url_for('static', filename='images/resultado-status.png') }}" alt="Ferramenta Radar de Variável" class="img-ferramenta">
+    </div>
+
+    <div class="card">
+        <h2>📊 Dashboard de Receita Variável</h2>
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" alt="Ferramenta Dashboard" class="img-ferramenta">
+    </div>
+
+
+
+
 </section>
 
-
-
-<!-- ========================================= -->
-<!-- =============== DOBRA 3 ================= -->
-<!-- ========================================= -->
-
+<!-- DOBRA 3 -->
 <section id="dobra3">
     <div class="card">
         <h2>⚙️ O Que Construímos</h2>
@@ -364,12 +295,7 @@ ul {
     </div>
 </section>
 
-
-
-<!-- ========================================= -->
-<!-- =============== DOBRA 4 ================= -->
-<!-- ========================================= -->
-
+<!-- DOBRA 4 -->
 <section id="dobra4">
     <div class="card">
         <h2>🚀 Como Movemos o Projeto</h2>
@@ -383,12 +309,7 @@ ul {
     </div>
 </section>
 
-
-
-<!-- ========================================= -->
-<!-- =============== DOBRA 5 ================= -->
-<!-- ========================================= -->
-
+<!-- DOBRA 5 -->
 <section id="dobra5">
     <div class="card">
         <h2>🕳️ Gaps & Próximos Passos</h2>
@@ -413,39 +334,29 @@ ul {
 </section>
 
 
-
-<!-- ========================================= -->
-<!-- ========== VIEWER DE IMAGEM ============ -->
-<!-- ========================================= -->
-
-<div class="image-viewer" id="imageViewer">
-    <span class="close-viewer" onclick="closeViewer()">×</span>
-    <img id="viewerImage" src="">
-</div>
-
-
-
-<!-- ========================================= -->
-<!-- ================ SCRIPT ================= -->
-<!-- ========================================= -->
-
 <script>
-function openViewer(imageSrc) {
-    let viewer = document.getElementById("imageViewer");
-    let img = document.getElementById("viewerImage");
+    // Seleciona todos os cards (mini-dash e dobras)
+    const cards = document.querySelectorAll('.dash-card, .card');
 
-    img.src = imageSrc;
-    viewer.style.display = "flex";
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
 
-}
+            // Se já está ampliado, volta ao normal
+            if (card.classList.contains('zoomed')) {
+                card.classList.remove('zoomed');
+                return;
+            }
 
-function closeViewer() {
-    let viewer = document.getElementById("imageViewer");
-    viewer.style.display = "none";
+            // Remove zoom de qualquer outro card
+            document.querySelectorAll('.zoomed').forEach(el => {
+                el.classList.remove('zoomed');
+            });
 
-}
+            // Aplica zoom neste card
+            card.classList.add('zoomed');
+        });
+    });
 </script>
-
 
 </body>
 </html>

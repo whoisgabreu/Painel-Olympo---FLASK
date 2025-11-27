@@ -8,6 +8,14 @@ body {
     padding: 0;
 }
 
+.logo {
+    position: inherit;
+    padding-left: 5vw;
+    margin-top: -150px;
+    margin-bottom: -150px;
+    opacity: 1
+}
+
 /* Centralização da página inteira */
 .page-center {
     min-height: 100vh;
@@ -20,7 +28,7 @@ body {
 /* ===== CARD DO FORMULÁRIO ===== */
 
 .form-card {
-    background: #ffffff;
+    background: #fdfdfd;
     width: 100%;
     max-width: 820px;
     padding: 32px;

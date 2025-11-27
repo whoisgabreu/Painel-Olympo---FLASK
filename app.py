@@ -667,7 +667,7 @@ def formulario():
 
 #     return render_template("classificacao_form.html", criterios=criterios)
 
-@app.route('/forms-variavel', methods=['GET', 'POST'])
+@app.route('/radar-de-variavel', methods=['GET', 'POST'])
 def classificacao():
 
     criterios = {
