@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from markupsafe import Markup
+import requests as rq
 import requests
 import pandas as pd
 import re
@@ -587,9 +588,209 @@ def potencial_crescimento():
         total_clientes=len(df_filtrado)
     )
 
+# -----------------------------
+# FORMULÁRIO
+# -----------------------------
+@app.route('/formulario', methods=['GET', 'POST'])
+def formulario():
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        comentario = request.form.get('comentario')
+        
+        # Aqui você trata os dados — salvar em banco, webhook, excel, etc.
+        print("Nome:", nome)
+        print("E-mail:", email)
+        print("Comentário:", comentario)
+
+        return render_template('form_success.html', nome=nome)
+
+    return render_template('formulario.html')
+
+# # Classificação antiga
+# @app.route('/classificacao', methods=['GET', 'POST'])
+# def classificacao():
+
+#     criterios = {
+#         "Faturamento": ["0 a 69mil", "70mil a 100mil", "101mil a 200mil", "201mil a 400mil", "401mil a 1mm", "1mm a 2mm", "2mm a 4mm", "5mm a 16mm", "17mm a 40mm", "Acima de 40mm"],  #9 #Peso 2
+#         "Ticket Médio": ["Até R$2.000", "Entre R$2.000 e R$20.0000", "Acima de R$20.000"],#2  #Peso 2
+#         "Step": ["V0", "V1", "V2", "V3", "V4"],#4  #Peso 3
+#         "Empresa Familiar": ["Sim", "Não"], #1  #Peso 2
+#         "Tempo de Mercado": ["Novo", "1-2 anos", "2-5 anos", "5+ anos"],#3  #Peso 1
+#         "Ebitda": ["0% a 10%", "11% a 20%", "21% a 30%", "31% a 40%", "51% a 60%", "61% a 70%", "81% a 90%", "91% a 100%"], #Peso 3
+#         "Aderência do Cliente ao Modelo Variável": ["Baixo", "Médio", "Alto"], #Peso 3
+#         "Projeto tem CRM sendo utilizado a mais de 1 ano?": ["Não", "Sim"], #Peso 3
+#         "Projeto tem inteligencia de dados de funil comercial?": ["Não", "Sim"], #Peso 3
+#         "Health Score": ["Novo Cliente","Aviso Prévio","Danger", "Care","Safe"], #Peso 2
+#     }
+
+#     # Opções que zeram pontos
+#     # Step: V1 Analisa, V0 Zera
+#     # Ebitda: 0 a 10% zera
+
+#     # Tela com pontos positivos e negativos explicando o feedback do cliente
+
+# ## Analise de Crédito do Cliente
+# # Analise de Credito Ruim > Paga Mal
+
+
+#     if request.method == "POST":
+
+#         # respostas = {campo: request.form.get(campo) for campo in criterios.keys()}
+#         # respostas["Nome do Cliente"] = request.form.get("Nome do Cliente")
+
+#         respostas = {
+#             "Nome do Cliente": request.form.get("Nome do Cliente"),
+#             **{campo: request.form.get(campo) for campo in criterios.keys()}
+#         }
+
+#         pontos = 0
+
+#         # cálculo automático baseado no index
+#         for criterio, opcoes in criterios.items():
+#             resposta = request.form.get(criterio)
+#             indice = opcoes.index(resposta)
+#             pontos += indice
+
+#         # classificação baseada na soma dos índices
+#         if pontos >= 6:
+#             resultado = "Apto"
+#         elif pontos >= 3:
+#             resultado = "Revisar"
+#         else:
+#             resultado = "Não Apto"
+
+#         return render_template("resultado_classificacao.html",
+#                                respostas=respostas,
+#                                resultado=resultado,
+#                                pontos=pontos)
+
+#     return render_template("classificacao_form.html", criterios=criterios)
+
+@app.route('/classificacao', methods=['GET', 'POST'])
+def classificacao():
+
+    criterios = {
+        "Faturamento": ["0 a 69mil", "70mil a 100mil", "101mil a 200mil", "201mil a 400mil", "401mil a 1mm", "1mm a 2mm", "2mm a 4mm", "5mm a 16mm", "17mm a 40mm", "Acima de 40mm"],
+        "Ticket Médio": ["Até R$2.000", "Entre R$2.000 e R$20.0000", "Acima de R$20.000"],
+        "Step": ["V0", "V1", "V2", "V3", "V4"],
+        "Empresa Familiar": ["Sim", "Não"],
+        "Tempo de Mercado": ["Novo", "1-2 anos", "2-5 anos", "5+ anos"],
+        "Ebitda": ["0% a 10%", "11% a 20%", "21% a 30%", "31% a 40%", "51% a 60%", "61% a 70%", "81% a 90%", "91% a 100%"],
+        "Aderência do Cliente ao Modelo Variável": ["Baixo", "Médio", "Alto"],
+        "Projeto tem CRM sendo utilizado a mais de 1 ano?": ["Não", "Sim"],
+        "Projeto tem inteligencia de dados de funil comercial?": ["Não", "Sim"],
+        "Health Score": ["Novo Cliente","Aviso Prévio","Danger", "Care","Safe"],
+    }
+
+    pesos = {
+        "Faturamento": 2,
+        "Ticket Médio": 2,
+        "Step": 3,
+        "Empresa Familiar": 2,
+        "Tempo de Mercado": 1,
+        "Ebitda": 3,
+        "Aderência do Cliente ao Modelo Variável": 3,
+        "Projeto tem CRM sendo utilizado a mais de 1 ano?": 3,
+        "Projeto tem inteligencia de dados de funil comercial?": 3,
+        "Health Score": 2,
+    }
+
+    regras_forcadas = {
+        "Step": {
+            "V0": "Não Apto",
+            "V1": "Revisar"
+        },
+        "Ebitda": {
+            "0% a 10%": "Não Apto",
+            "11% a 20%": "Revisar"
+        }
+    }
+
+    if request.method == "POST":
+
+        respostas = {
+            "Nome do Cliente": request.form.get("Nome do Cliente"),
+            **{campo: request.form.get(campo) for campo in criterios.keys()}
+        }
+
+        analise_ia = rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/cliente-variavel", json = respostas)
+
+        # 1 - VERIFICAR REGRAS ABSOLUTAS
+        for criterio, regras in regras_forcadas.items():
+            resposta = respostas.get(criterio)
+            if resposta in regras:
+                resultado = regras[resposta]
+                respostas["resultado"] = resultado
+                rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
+                return render_template(
+                    "resultado_classificacao.html",
+                    respostas=respostas,
+                    resultado=resultado,
+                    pontos="Forçado por regra",
+                    analise_ia=analise_ia.json()[0]  # deve ser um dict, não string
+                )
+
+        # 2 - CALCULAR PONTOS (ÍNDICE * PESO)
+        # sistema de pontuação antigo
+        # pontos = 0
+
+        # for criterio, opcoes in criterios.items():
+        #     resposta = respostas[criterio]
+        #     indice = opcoes.index(resposta)
+
+        #     peso = pesos.get(criterio, 1)
+
+        #     pontos += indice * peso
+
+        # # 3 - CLASSIFICAÇÃO POR PONTOS
+        # if pontos >= 40:
+        #     resultado = "Apto"
+        # elif pontos >= 20:
+        #     resultado = "Revisar"
+        # else:
+        #     resultado = "Não Apto"
+
+        # Sistema de pontuação novo
+        pontos = 0
+        pontos_maximos = 0
+
+        for criterio, opcoes in criterios.items():
+            resposta = respostas[criterio]
+            indice = opcoes.index(resposta)
+
+            peso = pesos.get(criterio, 1)
+
+            pontos += indice * peso
+            pontos_maximos += (len(opcoes) - 1) * peso
+
+        # 3 - NORMALIZAÇÃO AUTOMÁTICA
+        pontuacao = (pontos / pontos_maximos) * 100
+
+        # 4 - CLASSIFICAÇÃO AUTOMÁTICA
+        if pontuacao >= 70:
+            resultado = "Apto"
+        elif pontuacao >= 40:
+            resultado = "Revisar"
+        else:
+            resultado = "Não Apto"
+
+        respostas["resultado"] = resultado
+        rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
+
+        return render_template("resultado_classificacao.html",
+                                respostas=respostas,
+                                resultado=resultado,
+                                pontos=pontos,
+                                analise_ia=analise_ia.json()[0]  # deve ser um dict, não string
+                            )
+
+
+
+    return render_template("classificacao_form.html", criterios=criterios)
 
 # -----------------------------
 # RUN
 # -----------------------------
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5001)
+    app.run("0.0.0.0", port=5001, debug=True)
