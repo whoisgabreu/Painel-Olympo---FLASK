@@ -1,5 +1,9 @@
 /* ===== GERAL ===== */
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
     background: #f5f7fa;
     font-family: "Inter", Arial, sans-serif;
@@ -165,4 +169,5 @@ button:hover {
 
 p {
     line-height: 2; /* pode usar 1.2, 1.4, 20px, etc. */
+
 }
