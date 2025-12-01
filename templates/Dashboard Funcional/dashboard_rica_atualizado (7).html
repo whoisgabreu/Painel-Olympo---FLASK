@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Rica Alimentos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #003d5c 0%, #005f8a 100%);
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            width: 155px;      /* largura que você quer exibir */
+            overflow: hidden;  /* corta o que passar -> direita */
+        }
+
+        .logo-container img {
+            height: 70px;
+            width: auto;
+            display: block;    /* evita espaçamentos */
+            object-position: left; /* garante alinhamento à esquerda */
+            object-fit: cover; /* corta o excesso */
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            padding: 15px 35px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid transparent;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 153, 0, 0.3);
+            border-color: #FF9900;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #0099CC 0%, #FF9900 100%);
+            border-color: #FF9900;
+            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.2) 0%, rgba(255, 153, 0, 0.1) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255, 153, 0, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(255, 153, 0, 0.4);
+            border-color: #FF9900;
+        }
+
+        .metric-card h3 {
+            font-size: 0.95em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-card .value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .metric-card.investment .value { color: #0099CC; }
+        .metric-card.impressions .value { color: #66d9ff; }
+        .metric-card.clicks .value { color: #FF9900; }
+        .metric-card.conversions .value { color: #ffcc00; }
+        .metric-card.cost .value { color: #ff6b6b; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.15) 0%, rgba(255, 153, 0, 0.05) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid rgba(0, 153, 204, 0.3);
+            min-height: 450px;
+        }
+
+        .chart-card.horizontal-compact {
+            min-height: 200px;
+            padding: 25px 30px;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 25px;
+            color: #ffffff;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .funnel-container {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.15) 0%, rgba(255, 153, 0, 0.05) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 25px;
+            border: 2px solid rgba(0, 153, 204, 0.3);
+        }
+
+        .funnel-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .funnel-item:hover {
+            background: rgba(255, 153, 0, 0.15);
+            transform: translateX(5px);
+            border-left-color: #FF9900;
+        }
+
+        .funnel-label {
+            flex: 1;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .funnel-bar {
+            flex: 3;
+            height: 35px;
+            background: linear-gradient(90deg, #0099CC 0%, #FF9900 100%);
+            border-radius: 8px;
+            margin: 0 20px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(255, 153, 0, 0.3);
+        }
+
+        .funnel-value {
+            font-weight: bold;
+            min-width: 100px;
+            text-align: right;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5em;
+        }
+
+        .error {
+            background: #d32f2f;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container img {
+                height: 50px;
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="./Logomaior.webp" alt="Rica Alimentos">
+            </div>
+            <h1>Dashboard Marketing Ads - Campanha de Natal</h1>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('geral', this)">Visão Geral</button>
+            <button class="tab-button" onclick="switchTab('meta', this)">Meta Ads</button>
+            <button class="tab-button" onclick="switchTab('google', this)">Google Ads</button>
+        </div>
+
+        <div id="loading" class="loading">Carregando dados...</div>
+        <div id="error" class="error" style="display:none;"></div>
+
+        <!-- TAB GERAL -->
+        <div id="tab-geral" class="tab-content active" style="display:none;">
+            <div class="metrics-grid">
+                <div class="metric-card investment">
+                    <h3>Investimento Total</h3>
+                    <div class="value" id="geral-investimento">R$ 0</div>
+                </div>
+                <div class="metric-card impressions">
+                    <h3>Impressões</h3>
+                    <div class="value" id="geral-impressoes">0</div>
+                </div>
+                <div class="metric-card clicks">
+                    <h3>Cliques</h3>
+                    <div class="value" id="geral-cliques">0</div>
+                </div>
+                <div class="metric-card conversions">
+                    <h3>Conversões + Compras</h3>
+                    <div class="value" id="geral-conversoes">0</div>
+                </div>
+                <div class="metric-card cost">
+                    <h3>Custo por Resultado</h3>
+                    <div class="value" id="geral-custo">R$ 0</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card horizontal-compact">
+                    <h3>Investimento por Canal</h3>
+                    <div style="height: 120px;">
+                        <canvas id="chart-investimento-canal"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Volume de Conversões Mensal</h3>
+                    <canvas id="chart-conversoes-mensal"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Impressões e Cliques</h3>
+                    <canvas id="chart-impressoes-cliques"></canvas>
+                </div>
+            </div>
+        
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Cliques x CTR</h3>
+                    <canvas id="chart-cliques-ctr"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>CTR Mensal por Canal</h3>
+                    <canvas id="chart-ctr-mensal"></canvas>
+                </div>
+            </div>
+
+            <div class="funnel-container">
+                <h3>Funis de Marketing</h3>
+                <div id="funnel-geral"></div>
+            </div>
+        </div>
+
+        <!-- TAB META ADS -->
+        <div id="tab-meta" class="tab-content" style="display:none;">
+            <div class="metrics-grid">
+                <div class="metric-card investment">
+                    <h3>Investimento</h3>
+                    <div class="value" id="meta-investimento">R$ 0</div>
+                </div>
+                <div class="metric-card impressions">
+                    <h3>Impressões</h3>
+                    <div class="value" id="meta-impressoes">0</div>
+                </div>
+                <div class="metric-card clicks">
+                    <h3>Cliques</h3>
+                    <div class="value" id="meta-cliques">0</div>
+                </div>
+                <div class="metric-card conversions">
+                    <h3>Compras</h3>
+                    <div class="value" id="meta-compras">0</div>
+                </div>
+                <div class="metric-card cost">
+                    <h3>ROAS</h3>
+                    <div class="value" id="meta-roas">0</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Investimento e Compras</h3>
+                    <canvas id="chart-meta-investimento"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Cliques x Custo por Clique</h3>
+                    <canvas id="chart-meta-cliques"></canvas>
+                </div>
+            </div>
+
+            <div class="funnel-container">
+                <h3>Funil de Conversão - Meta Ads</h3>
+                <div id="funnel-meta"></div>
+            </div>
+        </div>
+
+        <!-- TAB GOOGLE ADS -->
+        <div id="tab-google" class="tab-content" style="display:none;">
+            <div class="metrics-grid">
+                <div class="metric-card investment">
+                    <h3>Investimento</h3>
+                    <div class="value" id="google-investimento">R$ 0</div>
+                </div>
+                <div class="metric-card impressions">
+                    <h3>Impressões</h3>
+                    <div class="value" id="google-impressoes">0</div>
+                </div>
+                <div class="metric-card clicks">
+                    <h3>Cliques</h3>
+                    <div class="value" id="google-cliques">0</div>
+                </div>
+                <div class="metric-card conversions">
+                    <h3>Conversões</h3>
+                    <div class="value" id="google-conversoes">0</div>
+                </div>
+                <div class="metric-card cost">
+                    <h3>CPA</h3>
+                    <div class="value" id="google-cpa">R$ 0</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Investimento e Conversões</h3>
+                    <canvas id="chart-google-investimento"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Cliques x Custo por Clique</h3>
+                    <canvas id="chart-google-cliques"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let metaData = null;
+        let googleData = null;
+        let charts = {};
+
+        // Função para trocar de aba
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            element.classList.add('active');
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            targetTab.classList.add('active');
+            targetTab.style.display = 'block';
+        }
+
+        // Formatar números
+        function formatNumber(num) {
+            return new Intl.NumberFormat('pt-BR').format(Math.round(num));
+        }
+
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
+        }
+
+        // Carregar dados
+        async function loadData() {
+            try {
+                const [metaResponse, googleResponse] = await Promise.all([
+                    fetch('https://n8n.v4lisboatech.com.br/webhook/dados-rica-alimentos/meta'),
+                    fetch('https://n8n.v4lisboatech.com.br/webhook/dados-rica-alimentos/google')
+                ]);
+
+                metaData = await metaResponse.json();
+                googleData = await googleResponse.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('tab-geral').style.display = 'block';
+
+                renderGeralTab();
+                renderMetaTab();
+                renderGoogleTab();
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Erro ao carregar dados: ' + error.message;
+            }
+        }
+
+        // Renderizar aba geral
+        function renderGeralTab() {
+            const metaTotais = metaData[0].totais[0];
+            const googleTotais = googleData[0].totais[0];
+
+            const investimentoTotal = metaTotais.VALOR_USADO + googleTotais.INVESTIMENTO;
+            const impressoesTotal = metaTotais["IMPRESSÕES"] + googleTotais["IMPRESSÕES"];
+            const cliquesTotal = metaTotais.CLIQUES + googleTotais.CLIQUES;
+            const conversoesTotal = metaTotais.COMPRAS + googleTotais["CONVERSÕES"];
+
+            document.getElementById('geral-investimento').textContent = formatCurrency(investimentoTotal);
+            document.getElementById('geral-impressoes').textContent = formatNumber(impressoesTotal);
+            document.getElementById('geral-cliques').textContent = formatNumber(cliquesTotal);
+            document.getElementById('geral-conversoes').textContent = formatNumber(conversoesTotal);
+            document.getElementById('geral-custo').textContent = formatCurrency(investimentoTotal / conversoesTotal);
+
+            // Agrupar dados por mês
+            const mesesMeta = {};
+            const mesesGoogle = {};
+
+            metaData[0].dados.forEach(item => {
+                const mes = item.DIA.substring(0, 7);
+                if (!mesesMeta[mes]) {
+                    mesesMeta[mes] = { impressoes: 0, cliques: 0, conversoes: 0 };
+                }
+                mesesMeta[mes].impressoes += item["IMPRESSÕES"];
+                mesesMeta[mes].cliques += item.CLIQUES;
+                mesesMeta[mes].conversoes += item.COMPRAS || 0;
+            });
+
+            googleData[0].dados.forEach(item => {
+                const mes = item.DIA.substring(0, 7);
+                if (!mesesGoogle[mes]) {
+                    mesesGoogle[mes] = { impressoes: 0, cliques: 0, conversoes: 0 };
+                }
+                mesesGoogle[mes].impressoes += item["IMPRESSÕES"];
+                mesesGoogle[mes].cliques += item.CLIQUES;
+                mesesGoogle[mes].conversoes += item["CONVERSÕES"] || 0;
+            });
+
+            const mesesUnicos = [...new Set([...Object.keys(mesesMeta), ...Object.keys(mesesGoogle)])].sort();
+
+            // GRÁFICO 1: Volume de Conversões Mensal
+            const conversoesMeta = mesesUnicos.map(mes => mesesMeta[mes]?.conversoes || 0);
+            const conversoesGoogle = mesesUnicos.map(mes => mesesGoogle[mes]?.conversoes || 0);
+            
+            const ctx1 = document.getElementById('chart-conversoes-mensal').getContext('2d');
+            if (charts.conversoesMensal) charts.conversoesMensal.destroy();
+            charts.conversoesMensal = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: mesesUnicos,
+                    datasets: [
+                        {
+                            label: 'Meta Ads',
+                            data: conversoesMeta,
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Google Ads',
+                            data: conversoesGoogle,
+                            borderColor: '#FF9900',
+                            backgroundColor: 'rgba(255, 153, 0, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // GRÁFICO 2: Impressões e Cliques
+            const impressoesTotal_arr = mesesUnicos.map(mes => 
+                (mesesMeta[mes]?.impressoes || 0) + (mesesGoogle[mes]?.impressoes || 0)
+            );
+            const cliquesTotal_arr = mesesUnicos.map(mes => 
+                (mesesMeta[mes]?.cliques || 0) + (mesesGoogle[mes]?.cliques || 0)
+            );
+
+            const ctx2 = document.getElementById('chart-impressoes-cliques').getContext('2d');
+            if (charts.impressoesCliques) charts.impressoesCliques.destroy();
+            charts.impressoesCliques = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: mesesUnicos,
+                    datasets: [
+                        {
+                            label: 'Impressões',
+                            data: impressoesTotal_arr,
+                            backgroundColor: '#0099CC',
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            label: 'Cliques',
+                            data: cliquesTotal_arr,
+                            type: 'line',
+                            borderColor: '#FF9900',
+                            backgroundColor: 'rgba(255, 153, 0, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            yAxisID: 'y1',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Impressões',
+                                color: '#ffffff'
+                            },
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Cliques',
+                                color: '#ffffff'
+                            },
+                            ticks: { color: '#ffffff' },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // GRÁFICO 3: Investimento por Canal (Barras Horizontais Empilhadas)
+            const totalInvestimento = metaTotais.VALOR_USADO + googleTotais.INVESTIMENTO;
+            const percentualMeta = ((metaTotais.VALOR_USADO / totalInvestimento) * 100).toFixed(1);
+            const percentualGoogle = ((googleTotais.INVESTIMENTO / totalInvestimento) * 100).toFixed(1);
+
+            const ctx3 = document.getElementById('chart-investimento-canal').getContext('2d');
+            if (charts.investimentoCanal) charts.investimentoCanal.destroy();
+            charts.investimentoCanal = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Investimento Total'],
+                    datasets: [
+                        {
+                            label: 'Meta Ads',
+                            data: [metaTotais.VALOR_USADO],
+                            backgroundColor: '#0099CC',
+                            borderRadius: 8,
+                            barThickness: 60
+                        },
+                        {
+                            label: 'Google Ads',
+                            data: [googleTotais.INVESTIMENTO],
+                            backgroundColor: '#FF9900',
+                            borderRadius: 8,
+                            barThickness: 60
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: { 
+                                color: '#ffffff', 
+                                font: { size: 14 },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.x;
+                                    const percentage = ((value / totalInvestimento) * 100).toFixed(1);
+                                    return context.dataset.label + ': ' + formatCurrency(value) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: { 
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: { color: '#ffffff' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // GRÁFICO 4: CTR Mensal por Canal
+            const ctrMeta = mesesUnicos.map(mes => {
+                const imp = mesesMeta[mes]?.impressoes || 0;
+                const cli = mesesMeta[mes]?.cliques || 0;
+                return imp > 0 ? (cli / imp) * 100 : 0;
+            });
+            
+            const ctrGoogle = mesesUnicos.map(mes => {
+                const imp = mesesGoogle[mes]?.impressoes || 0;
+                const cli = mesesGoogle[mes]?.cliques || 0;
+                return imp > 0 ? (cli / imp) * 100 : 0;
+            });
+
+            const ctx4 = document.getElementById('chart-ctr-mensal').getContext('2d');
+            if (charts.ctrMensal) charts.ctrMensal.destroy();
+            charts.ctrMensal = new Chart(ctx4, {
+                type: 'line',
+                data: {
+                    labels: mesesUnicos,
+                    datasets: [
+                        {
+                            label: 'Meta Ads CTR (%)',
+                            data: ctrMeta,
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Google Ads CTR (%)',
+                            data: ctrGoogle,
+                            borderColor: '#FF9900',
+                            backgroundColor: 'rgba(255, 153, 0, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { 
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return value.toFixed(1) + '%';
+                                }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // GRÁFICO 5: Cliques x CTR
+            const cliquesTotais = mesesUnicos.map(mes => 
+                (mesesMeta[mes]?.cliques || 0) + (mesesGoogle[mes]?.cliques || 0)
+            );
+            
+            const ctrTotalMensal = mesesUnicos.map(mes => {
+                const impressoes = (mesesMeta[mes]?.impressoes || 0) + (mesesGoogle[mes]?.impressoes || 0);
+                const cliques = (mesesMeta[mes]?.cliques || 0) + (mesesGoogle[mes]?.cliques || 0);
+                return impressoes > 0 ? (cliques / impressoes) * 100 : 0;
+            });
+
+            const ctx5 = document.getElementById('chart-cliques-ctr').getContext('2d');
+            if (charts.cliquesCtr) charts.cliquesCtr.destroy();
+            charts.cliquesCtr = new Chart(ctx5, {
+                type: 'bar',
+                data: {
+                    labels: mesesUnicos,
+                    datasets: [
+                        {
+                            label: 'Cliques Totais',
+                            data: cliquesTotais,
+                            backgroundColor: '#FF9900',
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            label: 'CTR Médio (%)',
+                            data: ctrTotalMensal,
+                            type: 'line',
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            yAxisID: 'y1',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.yAxisID === 'y1') {
+                                        label += context.parsed.y.toFixed(2) + '%';
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Cliques',
+                                color: '#ffffff'
+                            },
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'CTR (%)',
+                                color: '#ffffff'
+                            },
+                            ticks: { 
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return value.toFixed(1) + '%';
+                                }
+                            },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Funil geral
+            const funnelData = [
+                { label: 'Impressões', value: impressoesTotal },
+                { label: 'Cliques', value: cliquesTotal },
+                { label: 'Conversões', value: conversoesTotal }
+            ];
+            renderFunnel('funnel-geral', funnelData);
+        }
+
+        // Renderizar aba Meta
+        function renderMetaTab() {
+            const totais = metaData[0].totais[0];
+
+            document.getElementById('meta-investimento').textContent = formatCurrency(totais.VALOR_USADO);
+            document.getElementById('meta-impressoes').textContent = formatNumber(totais["IMPRESSÕES"]);
+            document.getElementById('meta-cliques').textContent = formatNumber(totais.CLIQUES);
+            document.getElementById('meta-compras').textContent = formatNumber(totais.COMPRAS);
+            document.getElementById('meta-roas').textContent = totais.ROAS.toFixed(2);
+
+            // Agrupar por mês
+            const meses = {};
+            metaData[0].dados.forEach(item => {
+                const mes = item.DIA.substring(0, 7);
+                if (!meses[mes]) {
+                    meses[mes] = { investimento: 0, compras: 0, cliques: 0, cpcValues: [] };
+                }
+                meses[mes].investimento += item.VALOR_USADO;
+                meses[mes].compras += item.COMPRAS || 0;
+                meses[mes].cliques += item.CLIQUES;
+                if (item.CPC) {
+                    meses[mes].cpcValues.push(parseFloat(item.CPC));
+                }
+            });
+
+            const labels = Object.keys(meses).sort();
+            const investimentos = labels.map(m => meses[m].investimento);
+            const compras = labels.map(m => meses[m].compras);
+            const cliques = labels.map(m => meses[m].cliques);
+            const cpcMedio = labels.map(m => {
+                const values = meses[m].cpcValues;
+                return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+            });
+
+            // Gráfico investimento e compras
+            const ctx1 = document.getElementById('chart-meta-investimento').getContext('2d');
+            if (charts.metaInvestimento) charts.metaInvestimento.destroy();
+            charts.metaInvestimento = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Investimento',
+                            data: investimentos,
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            yAxisID: 'y',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                        },
+                        {
+                            label: 'Compras',
+                            data: compras,
+                            borderColor: '#FF9900',
+                            backgroundColor: 'rgba(255, 153, 0, 0.2)',
+                            yAxisID: 'y1',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: { color: '#ffffff' },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de cliques x CPC
+            const ctx2 = document.getElementById('chart-meta-cliques').getContext('2d');
+            if (charts.metaCliques) charts.metaCliques.destroy();
+            charts.metaCliques = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Cliques',
+                            data: cliques,
+                            backgroundColor: '#FF9900',
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            label: 'CPC Médio (R$)',
+                            data: cpcMedio,
+                            type: 'line',
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            yAxisID: 'y1',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.yAxisID === 'y1') {
+                                        label += 'R$ ' + context.parsed.y.toFixed(2);
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Cliques',
+                                color: '#ffffff'
+                            },
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'CPC (R$)',
+                                color: '#ffffff'
+                            },
+                            ticks: { 
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(2);
+                                }
+                            },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Funil Meta
+            const funnelData = [
+                { label: 'Impressões', value: totais["IMPRESSÕES"] },
+                { label: 'Cliques', value: totais.CLIQUES },
+                { label: 'Visitas LP', value: totais["VISITAS NA LP"] },
+                { label: 'Compras', value: totais.COMPRAS }
+            ];
+            renderFunnel('funnel-meta', funnelData);
+        }
+
+        // Renderizar aba Google
+        function renderGoogleTab() {
+            const totais = googleData[0].totais[0];
+
+            document.getElementById('google-investimento').textContent = formatCurrency(totais.INVESTIMENTO);
+            document.getElementById('google-impressoes').textContent = formatNumber(totais["IMPRESSÕES"]);
+            document.getElementById('google-cliques').textContent = formatNumber(totais.CLIQUES);
+            document.getElementById('google-conversoes').textContent = formatNumber(totais["CONVERSÕES"]);
+            
+            const cpa = totais.INVESTIMENTO / totais["CONVERSÕES"];
+            document.getElementById('google-cpa').textContent = formatCurrency(cpa);
+
+            // Agrupar por mês
+            const meses = {};
+            googleData[0].dados.forEach(item => {
+                const mes = item.DIA.substring(0, 7);
+                if (!meses[mes]) {
+                    meses[mes] = { investimento: 0, conversoes: 0, cliques: 0, cpcValues: [] };
+                }
+                meses[mes].investimento += item.INVESTIMENTO;
+                meses[mes].conversoes += item["CONVERSÕES"];
+                meses[mes].cliques += item.CLIQUES;
+                if (item["CUSTO P/ CLIQUE"]) {
+                    meses[mes].cpcValues.push(parseFloat(item["CUSTO P/ CLIQUE"]));
+                }
+            });
+
+            const labels = Object.keys(meses).sort();
+            const investimentos = labels.map(m => meses[m].investimento);
+            const conversoes = labels.map(m => meses[m].conversoes);
+            const cliques = labels.map(m => meses[m].cliques);
+            const cpcMedio = labels.map(m => {
+                const values = meses[m].cpcValues;
+                return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+            });
+
+            // Gráfico investimento e conversões
+            const ctx1 = document.getElementById('chart-google-investimento').getContext('2d');
+            if (charts.googleInvestimento) charts.googleInvestimento.destroy();
+            charts.googleInvestimento = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Investimento',
+                            data: investimentos,
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Conversões',
+                            data: conversoes,
+                            borderColor: '#FF9900',
+                            backgroundColor: 'rgba(255, 153, 0, 0.2)',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: { color: '#ffffff' },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de cliques x CPC
+            const ctx2 = document.getElementById('chart-google-cliques').getContext('2d');
+            if (charts.googleCliques) charts.googleCliques.destroy();
+            charts.googleCliques = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Cliques',
+                            data: cliques,
+                            backgroundColor: '#FF9900',
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            label: 'CPC Médio (R$)',
+                            data: cpcMedio,
+                            type: 'line',
+                            borderColor: '#0099CC',
+                            backgroundColor: 'rgba(0, 153, 204, 0.2)',
+                            yAxisID: 'y1',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.yAxisID === 'y1') {
+                                        label += 'R$ ' + context.parsed.y.toFixed(2);
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Cliques',
+                                color: '#ffffff'
+                            },
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'CPC (R$)',
+                                color: '#ffffff'
+                            },
+                            ticks: { 
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(2);
+                                }
+                            },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Renderizar funil
+        function renderFunnel(elementId, data) {
+            const maxValue = Math.max(...data.map(d => d.value));
+            const html = data.map(item => {
+                const percentage = (item.value / maxValue) * 100;
+                return `
+                    <div class="funnel-item">
+                        <div class="funnel-label">${item.label}</div>
+                        <div class="funnel-bar" style="width: ${percentage}%"></div>
+                        <div class="funnel-value">${formatNumber(item.value)}</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById(elementId).innerHTML = html;
+        }
+
+        // Iniciar carregamento
+        loadData();
+    </script>
+</body>
+</html>
