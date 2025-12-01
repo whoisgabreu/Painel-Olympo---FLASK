@@ -783,6 +783,10 @@ def classificacao():
             resultado = "Não Apto"
 
         respostas["resultado"] = resultado
+        ## TESTE
+        resposta["pontos_positivos"] = analise_ia.json()[0]["pontos_positivos"]
+        resposta["pontos_negativos"] = analise_ia.json()[0]["pontos_negativos"]
+        ## FIM TESTE        
         rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
 
         return render_template("resultado_classificacao.html",
@@ -805,5 +809,6 @@ def apresentacao():
 # -----------------------------
 if __name__ == "__main__":
     app.run("0.0.0.0", port=5001, debug=True)
+
 
 
