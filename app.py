@@ -670,6 +670,9 @@ def formulario():
 @app.route('/radar-de-variavel', methods=['GET', 'POST'])
 def classificacao():
 
+    ## A FAZER
+    ## ADICIONAR AS RESPOSTAR DE PONTOS POSITIVOS E NEGATIVOS DA ANALISE_IA DENTRO DA RESPOSTA FOR MORMULÁRIO
+    
     criterios = {
         "Faturamento": ["0 a 69mil", "70mil a 100mil", "101mil a 200mil", "201mil a 400mil", "401mil a 1mm", "1mm a 2mm", "2mm a 4mm", "5mm a 16mm", "17mm a 40mm", "Acima de 40mm"],
         "Ticket Médio": ["Até R$2.000", "Entre R$2.000 e R$20.0000", "Acima de R$20.000"],
@@ -798,3 +801,4 @@ def apresentacao():
 # -----------------------------
 if __name__ == "__main__":
     app.run("0.0.0.0", port=5001, debug=True)
+
