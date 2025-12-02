@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potencial de Crescimento - Painel Olympo</title>
+    <script src="{{ plotly_cdn }}"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-yellow: #ffd700;
+            --neon-yellow-glow: #ffed4e;
+            --neon-blue: #00d4ff;
+            --neon-blue-dark: #0099cc;
+            --neon-blue-light: #4de6ff;
+            --dark-bg: #000000;
+            --dark-card: #0a0a0a;
+            --dark-card-hover: #121212;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Neon orbs background */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            top: -250px;
+            right: -250px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            animation: pulse-blue 4s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
+            bottom: -200px;
+            left: -200px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            animation: pulse-yellow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-blue {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        @keyframes pulse-yellow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.15); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-blue-light);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: var(--dark-card);
+            border-right: 2px solid var(--neon-blue);
+            box-shadow: 2px 0 10px rgba(0, 212, 255, 0.2);
+            padding: 24px 20px;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid var(--neon-yellow);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            color: var(--neon-yellow);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            text-shadow: 0 0 10px rgba(255, 237, 78, 0.5), 0 0 20px rgba(255, 237, 78, 0.3);
+            animation: glow-title 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-title {
+            0%, 100% { text-shadow: 0 0 10px rgba(255, 237, 78, 0.5), 0 0 20px rgba(255, 237, 78, 0.3); }
+            50% { text-shadow: 0 0 15px rgba(255, 237, 78, 0.6), 0 0 30px rgba(255, 237, 78, 0.4); }
+        }
+
+        .sidebar-subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--neon-blue) 20%, 
+                var(--neon-yellow) 50%, 
+                var(--neon-blue) 80%, 
+                transparent);
+            margin: 20px 0;
+            box-shadow: 0 0 5px rgba(0, 212, 255, 0.2);
+        }
+
+        .btn-nav {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--neon-blue-light);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .btn-nav.active {
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.2), rgba(255, 215, 0, 0.2));
+            color: var(--neon-blue-light);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3),
+                        inset 0 0 5px rgba(0, 212, 255, 0.1);
+        }
+
+        /* FILTROS */
+        .filtros-container {
+            margin-top: 20px;
+        }
+
+        .filtros-container h3 {
+            color: var(--neon-yellow);
+            margin-bottom: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 5px rgba(255, 237, 78, 0.3);
+        }
+
+        .filtro-grupo {
+            margin-bottom: 18px;
+            background: rgba(0, 212, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .filtro-label {
+            display: block;
+            color: var(--neon-blue-light);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .checkbox-container {
+            max-height: 140px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            margin-bottom: 2px;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 5px rgba(0, 212, 255, 0.15);
+        }
+
+        .checkbox-item.select-all {
+            background: rgba(0, 212, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--neon-blue);
+        }
+
+        .checkbox-item label {
+            color: var(--text-secondary);
+            cursor: pointer;
+            flex: 1;
+            user-select: none;
+            font-size: 11px;
+        }
+
+        .btn-filtrar {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-blue-dark));
+            color: var(--dark-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3),
+                        inset 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-filtrar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5),
+                        inset 0 0 8px rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, var(--neon-blue-light), var(--neon-blue));
+        }
+
+        .checkbox-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .checkbox-container::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 4px;
+            box-shadow: 0 0 3px rgba(0, 212, 255, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            color: var(--text-primary);
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .page-title span {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px rgba(255, 237, 78, 0.4), 0 0 20px rgba(255, 237, 78, 0.2);
+        }
+
+        /* KPIs */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: var(--dark-card);
+            padding: 24px;
+            border-radius: 16px;
+            border: 2px solid var(--neon-blue);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2),
+                        inset 0 0 10px rgba(0, 212, 255, 0.03);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-yellow), var(--neon-blue));
+            box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4),
+                        inset 0 0 15px rgba(0, 212, 255, 0.05);
+            border-color: var(--neon-blue-light);
+        }
+
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            color: var(--neon-blue-light);
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.4),
+                         0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        /* GRÁFICOS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .chart-container {
+            background: var(--dark-card);
+            padding: 24px;
+            border-radius: 16px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.15);
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+            position: relative;
+        }
+
+        .chart-container:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.25);
+        }
+
+        /* CRITICAL: Forçar contenção do Plotly */
+        .chart-container > div,
+        .chart-container .plotly-graph-div,
+        .chart-container .js-plotly-plot,
+        .chart-container .plot-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+        }
+
+        /* Forçar SVG do Plotly */
+        .chart-container svg {
+            max-width: 100% !important;
+            overflow: hidden !important;
+        }
+
+        /* TABELA */
+        .table-container {
+            background: var(--dark-card);
+            padding: 24px;
+            border-radius: 16px;
+            overflow-x: auto;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.15);
+        }
+
+        .table-title {
+            color: var(--neon-yellow);
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(255, 237, 78, 0.4);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--text-primary);
+        }
+
+        .data-table thead {
+            background: rgba(0, 212, 255, 0.1);
+            border-bottom: 2px solid var(--neon-blue);
+            box-shadow: 0 1px 5px rgba(0, 212, 255, 0.2);
+        }
+
+        .data-table th {
+            padding: 14px 16px;
+            text-align: left;
+            color: var(--neon-blue-light);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(0, 212, 255, 0.08);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.15);
+        }
+
+        .error {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(200, 0, 0, 0.2));
+            color: #ff4444;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 260px;
+            }
+            .main-content {
+                margin-left: 260px;
+                padding: 20px;
+            }
+            .page-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <!-- <img src="/static/logo.jpg" alt="Logo Olympo" class="logo"> -->
+        
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">PAINEL OLYMPO</h2>
+            <p class="sidebar-subtitle">⚡ Variáveis dos Deuses</p>
+        </div>
+        
+        <div class="divider"></div>
+
+        <button class="btn-nav" onclick="window.location.href='/'">
+            <span>📊</span> Painel Variável
+        </button>
+        <button class="btn-nav active" onclick="window.location.href='/potencial-crescimento'">
+            <span>📈</span> Potencial de Crescimento
+        </button>
+
+        {% if not error %}
+        <form method="GET" action="/potencial-crescimento">
+            <div class="filtros-container">
+                <h3>🎯 Filtros</h3>
+
+                <!-- Filtro Status -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Status do Cliente</label>
+                    <div class="checkbox-container">
+                        <div class="checkbox-item select-all">
+                            <input type="checkbox" id="select-all-status" checked>
+                            <label for="select-all-status">Selecionar Todos</label>
+                        </div>
+                        {% for s in opcoes_status %}
+                        <div class="checkbox-item">
+                            <input 
+                                type="checkbox" 
+                                name="status" 
+                                value="{{ s }}" 
+                                id="status-{{ loop.index }}"
+                                {% if s in selected_status %}checked{% endif %}
+                                class="status-checkbox"
+                            >
+                            <label for="status-{{ loop.index }}">{{ s }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Filtro Step -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Step Atual</label>
+                    <div class="checkbox-container">
+                        <div class="checkbox-item select-all">
+                            <input type="checkbox" id="select-all-step" checked>
+                            <label for="select-all-step">Selecionar Todos</label>
+                        </div>
+                        {% for st in opcoes_step %}
+                        <div class="checkbox-item">
+                            <input 
+                                type="checkbox" 
+                                name="step" 
+                                value="{{ st }}" 
+                                id="step-{{ loop.index }}"
+                                {% if st in selected_step %}checked{% endif %}
+                                class="step-checkbox"
+                            >
+                            <label for="step-{{ loop.index }}">{{ st }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Filtro Maturidade -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Maturidade</label>
+                    <div class="checkbox-container">
+                        <div class="checkbox-item select-all">
+                            <input type="checkbox" id="select-all-maturidade" checked>
+                            <label for="select-all-maturidade">Selecionar Todos</label>
+                        </div>
+                        {% for m in opcoes_maturidade %}
+                        <div class="checkbox-item">
+                            <input 
+                                type="checkbox" 
+                                name="maturidade" 
+                                value="{{ m }}" 
+                                id="maturidade-{{ loop.index }}"
+                                {% if m in selected_maturidade %}checked{% endif %}
+                                class="maturidade-checkbox"
+                            >
+                            <label for="maturidade-{{ loop.index }}">{{ m }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Filtro Crescimento -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Crescimento</label>
+                    <div class="checkbox-container">
+                        <div class="checkbox-item select-all">
+                            <input type="checkbox" id="select-all-crescimento" checked>
+                            <label for="select-all-crescimento">Selecionar Todos</label>
+                        </div>
+                        {% for c in opcoes_crescimento %}
+                        <div class="checkbox-item">
+                            <input 
+                                type="checkbox" 
+                                name="crescimento" 
+                                value="{{ c }}" 
+                                id="crescimento-{{ loop.index }}"
+                                {% if c in selected_crescimento %}checked{% endif %}
+                                class="crescimento-checkbox"
+                            >
+                            <label for="crescimento-{{ loop.index }}">{{ c }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-filtrar">Aplicar Filtros</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Potencial de <span>Crescimento</span></h1>
+        </div>
+
+        {% if error %}
+            <div class="error">❌ {{ error }}</div>
+        {% else %}
+            <!-- KPI -->
+            <div class="kpi-container">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total de Clientes</div>
+                    <div class="kpi-value">{{ total_clientes }}</div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    {{ fig_step }}
+                </div>
+
+                <div class="chart-container">
+                    {{ fig_status }}
+                </div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="table-container">
+                <h2 class="table-title">📋 Dados Completos</h2>
+                {{ df_table }}
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Funções de "Selecionar Todos"
+        function setupSelectAll(selectAllId, checkboxClass) {
+            const selectAll = document.getElementById(selectAllId);
+            const checkboxes = document.querySelectorAll('.' + checkboxClass);
+            
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                });
+                
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const total = checkboxes.length;
+                        const checked = document.querySelectorAll('.' + checkboxClass + ':checked').length;
+                        selectAll.checked = (total === checked);
+                    });
+                });
+            }
+        }
+
+        setupSelectAll('select-all-status', 'status-checkbox');
+        setupSelectAll('select-all-step', 'step-checkbox');
+        setupSelectAll('select-all-maturidade', 'maturidade-checkbox');
+        setupSelectAll('select-all-crescimento', 'crescimento-checkbox');
+    </script>
+</body>
+</html>

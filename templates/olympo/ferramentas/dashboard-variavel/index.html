@@ -1,0 +1,124 @@
+{% extends "olympo/ferramentas/dashboard-variavel/base.html" %}
+{% block filters %}
+<form method="get" action="{{ url_for('index') }}">
+  <!-- <label>Clientes</label>
+  <select name="cliente" multiple size="6">
+    {% for c in all_clients %}
+      <option value="{{ c }}" {% if c in selected_clients %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Meses</label>
+  <select name="mes" multiple size="6">
+    {% for m in meses_disponiveis %}
+      <option value="{{ m }}" {% if m in selected_months %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select> -->
+  <div class="checkbox-row">
+    <input type="checkbox" id="ticket" name="ticket" value="true" {% if mostrar_ticket %}checked{% endif %}>
+    <label for="ticket">Exibir linha de Ticket Médio</label>
+  </div>
+
+  <div class="filtros-container">
+    <h3>Filtros</h3>
+    
+    <div class="filtro-grupo">
+      <label class="filtro-label">Clientes</label>
+      <div class="checkbox-container">
+        <div class="checkbox-item select-all">
+          <input type="checkbox" id="select-all-clients" checked>
+          <label for="select-all-clients">Selecionar Todos</label>
+        </div>
+        {% for c in all_clients %}
+        <div class="checkbox-item">
+          <input 
+            type="checkbox" 
+            name="cliente" 
+            value="{{ c }}" 
+            id="cliente-{{ loop.index }}"
+            {% if c in selected_clients %}checked{% endif %}
+            class="cliente-checkbox"
+          >
+          <label for="cliente-{{ loop.index }}">{{ c }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="filtro-grupo">
+      <label class="filtro-label">Meses</label>
+      <div class="checkbox-container">
+        <div class="checkbox-item select-all">
+          <input type="checkbox" id="select-all-months" checked>
+          <label for="select-all-months">Selecionar Todos</label>
+        </div>
+        {% for m in meses_disponiveis %}
+        <div class="checkbox-item">
+          <input 
+            type="checkbox" 
+            name="mes" 
+            value="{{ m }}" 
+            id="mes-{{ loop.index }}"
+            {% if m in selected_months %}checked{% endif %}
+            class="mes-checkbox"
+          >
+          <label for="mes-{{ loop.index }}">{{ m }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn-filtrar">Aplicar Filtros</button>
+  </div>
+
+
+
+
+  <!-- <button type="submit" class="apply-btn">Aplicar filtros</button> -->
+</form>
+{% endblock %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <div class="kpis">
+    <div class="kpi">
+      <h3>💰 Valor Variável Total</h3>
+      <p>R$ {{ "{:,.2f}".format(kpi_valor_variavel) }}</p>
+    </div>
+    <div class="kpi">
+      <h3>💵 Valor Fixo Total</h3>
+      <p>R$ {{ "{:,.2f}".format(kpi_valor_fixo) }}</p>
+    </div>
+    <div class="kpi">
+      <h3>📊 Total de Registros</h3>
+      <p>{{ kpi_registros }}</p>
+    </div>
+    <div class="kpi">
+      <h3>🎟️ Total de Eventos</h3>
+      <p>{{ kpi_eventos }}</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <section>
+    <h2>📈 Evolução de Valor Variável</h2>
+    <div id="fig1">{{ fig1|safe }}</div>
+  </section>
+
+  <section>
+    <h2>📊 Comparativo</h2>
+    <div id="fig2">{{ fig2|safe }}</div>
+  </section>
+
+  <hr>
+
+  <!-- <section>
+    <h2>🧠 Agente Olympo (IA)</h2>
+    <p>Para consultar o agente, clique em Painel de Potencial (na sidebar) e use a interface do agente.</p>
+  </section> -->
+
+{% endblock %}

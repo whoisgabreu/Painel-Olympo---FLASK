@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resultado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/form_style.css') }}">
+</head>
+<body>
+<div class="page-center">
+
+
+    <div class="container">
+        <div class="form-card">
+            <h2>Resultado da Classificação</h2>
+    
+            <h3><strong>Status:</strong> {{ resultado }}</h3>
+    
+            <!-- <h3>Respostas enviadas:</h3>
+            <ul class="resultado-lista">
+                {% for criterio, resposta in respostas.items() %}
+                    <li><strong>{{ criterio }}:</strong> {{ resposta }}</li>
+                {% endfor %}
+            </ul> -->
+    
+            <!-- <h3>Análise da IA</h3> -->
+
+            <h3>Pontos Positivos</h4>
+            <div class="analise-ia-bloco">
+                <p>{{ analise_ia.pontos_positivos }}</p>
+                <!-- <ul>
+                    {% for item in analise_ia.pontos_positivos %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul> -->
+            </div>
+
+            <h3>Pontos Negativos</h4>
+            <div class="analise-ia-bloco">
+                <p>{{ analise_ia.pontos_negativos }}</p>
+                <!-- <ul>
+                    {% for item in analise_ia.pontos_negativos %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul> -->
+            </div>
+
+
+            <a href="/radar-de-variavel" class="btn">Registrar outro Lead</a>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

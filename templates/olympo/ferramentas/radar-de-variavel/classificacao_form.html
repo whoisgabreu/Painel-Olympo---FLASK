@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/form_style.css') }}">
+
+<div class="page-center">
+    <div class="form-card">
+        <img src="{{ url_for('static', filename='images/logo-radar.png') }}" class="logo" alt="logo">
+        <!-- <h2>Radar de Variável</h2> -->
+
+        <form method="POST">
+
+            <label>Nome do Cliente:</label>
+            <input name="Nome do Cliente" type="text" required>
+            {% for criterio, opcoes in criterios.items() %}
+                <label>{{ criterio }}:</label>
+                <select name="{{ criterio }}" required>
+                    <option value="">Selecione...</option>
+                    {% for item in opcoes %}
+                        <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            {% endfor %}
+
+            <button type="submit">Enviar Lead</button>
+
+        </form>
+
+        <!-- <a class="back-link" href="/">Voltar ao Dashboard</a> -->
+
+    </div>
+</div>

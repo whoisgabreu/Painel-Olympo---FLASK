@@ -279,7 +279,7 @@ def index():
     fig2_html = fig2.to_html(include_plotlyjs=False, full_html=False)
 
     return render_template(
-        "index.html",
+        "olympo/ferramentas/dashboard-variavel/index.html",
         fig1=Markup(fig1_html),
         fig2=Markup(fig2_html),
         plotly_cdn="https://cdn.plot.ly/plotly-latest.min.js",
@@ -572,7 +572,7 @@ def potencial_crescimento():
     df_table = df_filtrado.to_html(classes='data-table', index=False, escape=False)
     
     return render_template(
-        "potencial_crescimento.html",
+        "olympo/ferramentas/dashboard-variavel/potencial_crescimento.html",
         fig_step=Markup(fig_step_html),
         fig_status=Markup(fig_status_html),
         df_table=Markup(df_table),
@@ -591,21 +591,6 @@ def potencial_crescimento():
 # -----------------------------
 # FORMULÁRIO
 # -----------------------------
-@app.route('/formulario', methods=['GET', 'POST'])
-def formulario():
-    if request.method == 'POST':
-        nome = request.form.get('nome')
-        email = request.form.get('email')
-        comentario = request.form.get('comentario')
-        
-        # Aqui você trata os dados — salvar em banco, webhook, excel, etc.
-        print("Nome:", nome)
-        print("E-mail:", email)
-        print("Comentário:", comentario)
-
-        return render_template('form_success.html', nome=nome)
-
-    return render_template('formulario.html')
 
 # # Classificação antiga
 # @app.route('/classificacao', methods=['GET', 'POST'])
@@ -731,7 +716,7 @@ def classificacao():
                 ## FIM TESTE
                 rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
                 return render_template(
-                    "resultado_classificacao.html",
+                    "olympo/ferramentas/radar-de-variavel/resultado_classificacao.html",
                     respostas=respostas,
                     resultado=resultado,
                     pontos="Forçado por regra",
@@ -789,18 +774,18 @@ def classificacao():
         ## FIM TESTE        
         rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
 
-        return render_template("resultado_classificacao.html",
+        return render_template("olympo/ferramentas/radar-de-variavel/resultado_classificacao.html",
                                 respostas=respostas,
                                 resultado=resultado,
                                 pontos=pontos,
                                 analise_ia=analise_ia.json()[0]  # deve ser um dict, não string
                             )
 
-    return render_template("classificacao_form.html", criterios=criterios)
+    return render_template("olympo/ferramentas/radar-de-variavel/classificacao_form.html", criterios=criterios)
 
 @app.route('/apresentacao')
 def apresentacao():
-    return render_template("apresentacao.html")
+    return render_template("olympo/apresentacao/apresentacao.html")
 
 @app.route('/dashboards/rica/campanha/natal-2025')
 def dashboard_rica():
@@ -833,7 +818,7 @@ def site_map():
 # RUN
 # -----------------------------
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5001)
+    app.run("0.0.0.0", port=5001, debug = True)
 
 
 
