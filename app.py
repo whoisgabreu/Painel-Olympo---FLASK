@@ -659,7 +659,7 @@ def classificacao():
     ## ADICIONAR AS RESPOSTAR DE PONTOS POSITIVOS E NEGATIVOS DA ANALISE_IA DENTRO DA RESPOSTA FOR MORMULÁRIO
     
     criterios = {
-        "Faturamento": ["0 a 69mil", "70mil a 100mil", "101mil a 200mil", "201mil a 400mil", "401mil a 1mm", "1mm a 2mm", "2mm a 4mm", "5mm a 16mm", "17mm a 40mm", "Acima de 40mm"],
+        "Faturamento (Mensal)": ["0 a 69mil", "70mil a 100mil", "101mil a 200mil", "201mil a 400mil", "401mil a 1mm", "1mm a 2mm", "2mm a 4mm", "5mm a 16mm", "17mm a 40mm", "Acima de 40mm"],
         "Ticket Médio": ["Até R$2.000", "Entre R$2.000 e R$20.0000", "Acima de R$20.000"],
         "Step": ["V0", "V1", "V2", "V3", "V4"],
         "Empresa Familiar": ["Sim", "Não"],
@@ -672,7 +672,7 @@ def classificacao():
     }
 
     pesos = {
-        "Faturamento": 2,
+        "Faturamento (Mensal)": 2,
         "Ticket Médio": 2,
         "Step": 3,
         "Empresa Familiar": 2,
@@ -699,6 +699,7 @@ def classificacao():
 
         respostas = {
             "Nome do Cliente": request.form.get("Nome do Cliente"),
+            "E-mail": request.form.get("E-mail"),
             **{campo: request.form.get(campo) for campo in criterios.keys()}
         }
 

@@ -9,6 +9,25 @@
 
             <label>Nome do Cliente:</label>
             <input name="Nome do Cliente" type="text" required>
+            <label>Seu e-mail V4:</label>
+            <input id="email" name="E-mail" type="email" required>
+
+            <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const input = document.getElementById("email");
+
+                input.addEventListener("input", () => {
+                    const value = input.value;
+                    const regex = /^[a-zA-Z0-9._%+-]+@v4company\..+$/;
+
+                    if (!regex.test(value)) {
+                    input.setCustomValidity("O e-mail precisa conter @v4company e um domínio (ex: .com, .com.br).");
+                    } else {
+                    input.setCustomValidity("");
+                    }
+                });
+            });
+            </script>
             {% for criterio, opcoes in criterios.items() %}
                 <label>{{ criterio }}:</label>
                 <select name="{{ criterio }}" required>
