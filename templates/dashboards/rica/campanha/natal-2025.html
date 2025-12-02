@@ -270,7 +270,7 @@
     <div class="container">
         <div class="header">
             <div class="logo-container">
-                <img src="./Logomaior.webp" alt="Rica Alimentos">
+                <img src="{{ url_for('static', filename='images/rica/logo.webp') }}" alt="Rica Alimentos">
             </div>
             <h1>Dashboard Marketing Ads - Campanha de Natal</h1>
         </div>
@@ -455,6 +455,26 @@
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
         }
 
+        // Formatar mês (YYYY-MM → Nome do Mês)
+        function formatMonth(yearMonth) {
+            const meses = {
+                '01': 'Janeiro',
+                '02': 'Fevereiro',
+                '03': 'Março',
+                '04': 'Abril',
+                '05': 'Maio',
+                '06': 'Junho',
+                '07': 'Julho',
+                '08': 'Agosto',
+                '09': 'Setembro',
+                '10': 'Outubro',
+                '11': 'Novembro',
+                '12': 'Dezembro'
+            };
+            const [ano, mes] = yearMonth.split('-');
+            return meses[mes] || yearMonth;
+        }
+
         // Carregar dados
         async function loadData() {
             try {
@@ -530,7 +550,7 @@
             charts.conversoesMensal = new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: mesesUnicos,
+                    labels: mesesUnicos.map(formatMonth),
                     datasets: [
                         {
                             label: 'Meta Ads',
@@ -584,7 +604,7 @@
             charts.impressoesCliques = new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: mesesUnicos,
+                    labels: mesesUnicos.map(formatMonth),
                     datasets: [
                         {
                             label: 'Impressões',
@@ -737,7 +757,7 @@
             charts.ctrMensal = new Chart(ctx4, {
                 type: 'line',
                 data: {
-                    labels: mesesUnicos,
+                    labels: mesesUnicos.map(formatMonth),
                     datasets: [
                         {
                             label: 'Meta Ads CTR (%)',
@@ -806,7 +826,7 @@
             charts.cliquesCtr = new Chart(ctx5, {
                 type: 'bar',
                 data: {
-                    labels: mesesUnicos,
+                    labels: mesesUnicos.map(formatMonth),
                     datasets: [
                         {
                             label: 'Cliques Totais',
@@ -940,7 +960,7 @@
             charts.metaInvestimento = new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(formatMonth),
                     datasets: [
                         {
                             label: 'Investimento',
@@ -1001,7 +1021,7 @@
             charts.metaCliques = new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: labels.map(formatMonth),
                     datasets: [
                         {
                             label: 'Cliques',
@@ -1137,7 +1157,7 @@
             charts.googleInvestimento = new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(formatMonth),
                     datasets: [
                         {
                             label: 'Investimento',
@@ -1190,7 +1210,7 @@
             charts.googleCliques = new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: labels.map(formatMonth),
                     datasets: [
                         {
                             label: 'Cliques',

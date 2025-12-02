@@ -796,13 +796,38 @@ def classificacao():
                                 analise_ia=analise_ia.json()[0]  # deve ser um dict, não string
                             )
 
-
-
     return render_template("classificacao_form.html", criterios=criterios)
 
 @app.route('/apresentacao')
 def apresentacao():
     return render_template("apresentacao.html")
+
+@app.route('/dashboards/rica/campanha/natal-2025')
+def dashboard_rica():
+    # DADOS N8N
+    "https://n8n.v4lisboatech.com.br/workflow/WEjtNKeaY3Zik2SL"
+    return render_template("dashboards/rica/campanha/natal-2025.html")
+
+# Listar Endpoints
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
+
+@app.route("/site-map")
+def site_map():
+    links = []
+
+    for rule in app.url_map.iter_rules():
+        # Ignora endpoints com parâmetros obrigatórios
+        if has_no_empty_params(rule):
+            links.append({
+                "endpoint": rule.endpoint,
+                "rule": rule.rule,
+                "methods": list(rule.methods)
+            })
+
+    return {"endpoints": links}
 
 # -----------------------------
 # RUN
