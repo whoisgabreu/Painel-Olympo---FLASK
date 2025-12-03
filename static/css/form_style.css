@@ -171,3 +171,38 @@ p {
     line-height: 2; /* pode usar 1.2, 1.4, 20px, etc. */
 
 }
+
+
+/* TESTE SPINNER */
+
+
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #ddd;
+    border-top: 6px solid #ff4c4c;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

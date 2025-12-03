@@ -45,4 +45,22 @@
         <!-- <a class="back-link" href="/">Voltar ao Dashboard</a> -->
 
     </div>
+
+    <!-- TESTE SPINNER -->
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Enviando lead...</p>
+    </div>
+
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("form");
+    const loading = document.getElementById("loading");
+
+    form.addEventListener("submit", () => {
+        loading.classList.remove("hidden");
+    });
+});
+</script>
