@@ -13,8 +13,8 @@ body {
 }
 
 .logo {
-    position: inherit;
-    padding-left: 5vw;
+    position: inheri;
+    margin-left: -60px;
     margin-top: -150px;
     margin-bottom: -150px;
     opacity: 1

@@ -782,7 +782,7 @@ def classificacao():
                                 analise_ia=analise_ia.json()[0]  # deve ser um dict, não string
                             )
 
-    return render_template("olympo/ferramentas/radar-de-variavel/classificacao_form.html", criterios=criterios)
+    return render_template("olympo/ferramentas/radar-de-variavel/a.html", criterios=criterios)
 
 @app.route('/apresentacao')
 def apresentacao():
@@ -819,4 +819,4 @@ def site_map():
 # RUN
 # -----------------------------
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5001, debug = False)
+    app.run("0.0.0.0", port=5001, debug = True)
