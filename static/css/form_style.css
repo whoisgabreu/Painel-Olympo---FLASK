@@ -70,6 +70,10 @@ select, input, textarea {
     transition: all 0.2s ease;
 }
 
+input {
+    width: 97%;
+}
+
 select:focus, input:focus, textarea:focus {
     border-color: #e24a4a;
     box-shadow: 0 0 6px rgba(74, 144, 226, 0.3);
