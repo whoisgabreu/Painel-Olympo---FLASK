@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Radar de Variável</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #0a0a0a;
+            --bg-card: rgba(30, 30, 30, 0.9);
+            --bg-card-soft: rgba(30, 30, 30, 0.8);
+            --border-subtle: rgba(80, 80, 80, 0.3);
+            --accent: #dc2626;
+            --accent-soft: rgba(220, 38, 38, 0.15);
+            --text-primary: #e5e7eb;
+            --text-muted: #9ca3af;
+            --table-header: rgba(20, 20, 20, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1a1a1a 0, #0a0a0a 45%, #000 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin: 0 0 4px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        p {
+            margin: 0 0 24px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-soft));
+            border-radius: 16px;
+            padding: 14px 18px;
+            border: 1px solid var(--border-subtle);
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, 0.85),
+                0 0 0 1px rgba(30, 30, 30, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at top left, rgba(220, 38, 38, 0.08), transparent 60%);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Ranking (pódio) */
+        .rank-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:6px 10px;
+            margin:4px 0;
+            background:rgba(220, 38, 38, 0.06);
+            border:1px solid rgba(80, 80, 80, 0.35);
+            border-radius:6px;
+            color:#e5e7eb;
+            font-size:13px;
+            letter-spacing:.5px;
+            transition:.15s ease;
+        }
+        .rank-item:hover{
+            background:rgba(220, 38, 38, 0.12);
+            transform:translateY(-1px);
+            box-shadow:0 0 14px rgba(220, 38, 38, .35);
+        }
+        .rank-pos{
+            width:28px;
+            text-align:center;
+        }
+        .rank-email{
+            flex:1;
+            padding:0 8px;
+        }
+        .rank-score{
+            width:32px;
+            text-align:right;
+            font-weight:bold;
+            color:#dc2626;
+        }
+
+        /* Tabela */
+        .table-wrapper {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-soft));
+            border-radius: 16px;
+            padding: 16px 18px;
+            border: 1px solid var(--border-subtle);
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, 0.9),
+                0 0 0 1px rgba(30, 30, 30, 0.9);
+            overflow: auto;
+            margin-top: 8px;
+            max-height: 400px;
+        }
+
+        .table-wrapper h3 {
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            color: var(--text-primary);
+            border-spacing: 0;
+        }
+
+        thead {
+            background: var(--table-header);
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(80, 80, 80, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            /* backdrop-filter: blur(100px); */
+            background-color: black;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(80, 80, 80, 0.18);
+            transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(30, 30, 30, 0.65);
+        }
+
+        tbody tr:nth-child(odd) {
+            background: rgba(30, 30, 30, 0.45);
+        }
+
+        tbody tr:hover {
+            background: rgba(220, 38, 38, 0.08);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        td {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        /* Scrollbar mais clean */
+        .table-wrapper::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: rgba(20, 20, 20, 0.8);
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(80, 80, 80, 0.7);
+            border-radius: 999px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(80, 80, 80, 0.9);
+        }
+    </style>
+
+</head>
+<body>
+
+    <h1>Dashboard - Radar de Variável</h1>
+    <p>Visão geral dos leads cadastrados via Radar de Variável.</p>
+
+    <!-- Linha 1 de gráficos -->
+    <div class="charts-grid">
+        <div class="card">
+            <h3>Leads por Status</h3>
+            <div style="height: 260px;">
+                <canvas id="chart-status"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Health Score</h3>
+            <div style="height: 260px;">
+                <canvas id="chart-health"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha 2 de gráficos -->
+    <div class="charts-grid">
+        <div class="card">
+            <h3>Leads por Step (V0–V4)</h3>
+            <div style="height: 260px;">
+                <canvas id="chart-step"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Leads por dia (data_insercao)</h3>
+            <div style="height: 260px;">
+                <canvas id="chart-leads-dia"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking em lista (pódio) -->
+    <div class="charts-grid">
+        <div class="card">
+            <h3>Ranking de Preenchimento (Aptos)</h3>
+            <div id="ranking-preenchedores" style="padding:8px;"></div>
+        </div>
+
+        <div class="card">
+            <h3>Distribuição por Faturamento</h3>
+            <div style="height: 260px;">
+                <canvas id="chart-faturamento"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrapper">
+        <h3>Lista de leads</h3>
+        <table id="tabela-clientes">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Nome do Cliente</th>
+                    <th>Faturamento</th>
+                    <th>Ticket Médio</th>
+                    <th>Step</th>
+                    <th>Health Score</th>
+                    <th>Empresa Familiar</th>
+                    <th>E-mail Preenchedor</th>
+                    <th>Data de inserção</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Linhas via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let dados = null;
+
+        async function loadData() {
+            try {
+                const dadosResponse = await fetch("https://n8n.v4lisboatech.com.br/webhook/dashboard/radar-de-variavel");
+                dados = await dadosResponse.json();
+
+                createChartStatus();
+                createChartHealthScore();
+                createChartStep();
+                createChartLeadsPorDia();
+                createChartFaturamento();
+                createRankingPreenchedoresList(); // pódio
+                createTable();
+            } catch (error) {
+                console.error("Falha ao carregar os dados:", error);
+            }
+        }
+
+        // Helper: conta ocorrências por campo
+        function countByField(field) {
+            return dados.reduce((acc, item) => {
+                const key = item[field] || 'Não informado';
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+        }
+
+        // Helper: converte "DD-MM-YYYY" em objeto Date para ordenação
+        function parseDataInsercaoToDate(str) {
+            // Ex: "05-12-2025"
+            const [dia, mes, ano] = str.split('-');
+            return new Date(`${ano}-${mes}-${dia}T00:00:00`);
+        }
+
+        // Gráfico 1: Status (bar horizontal) - MANTÉM CORES ORIGINAIS
+        function createChartStatus() {
+            const statusCount = countByField('status');
+            const labels = Object.keys(statusCount);
+            const data = Object.values(statusCount);
+
+            // 🎨 Cor fixa por status
+            const coresStatus = {
+                "Apto": "#1CFF84",          // Verde neon
+                "Não Apto": "#dc2626",      // Vermelho
+                "Revisar": "#FFE647",       // Amarelo
+                "Novo Cliente": "#38bdf8",  // Azul neon
+                "Default": "#9ca3af"        // Cinza caso venha algo novo
+            };
+
+            // Gera cores na ordem exata dos labels
+            const backgroundColors = labels.map(status => coresStatus[status] || coresStatus["Default"]);
+
+            const ctx = document.getElementById('chart-status').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Leads por Status',
+                        data,
+                        backgroundColor: backgroundColors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${ctx.raw}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+        // function createChartStatus() {
+        //     const statusCount = countByField('status');
+        //     const labels = Object.keys(statusCount);
+        //     const data = Object.values(statusCount);
+
+        //     const ctx = document.getElementById('chart-status').getContext('2d');
+        //     new Chart(ctx, {
+        //         type: 'bar',
+        //         data: {
+        //             labels,
+        //             datasets: [{
+        //                 label: 'Leads por Status',
+        //                 data,
+        //                 backgroundColor: ['#dc2626', '#FF2E2E', '#FF5C5C']
+        //             }]
+        //         },
+        //         options: {
+        //             indexAxis: 'y',
+        //             responsive: true,
+        //             maintainAspectRatio: false,
+        //             plugins: {
+        //                 legend: { display: false },
+        //                 tooltip: {
+        //                     callbacks: {
+        //                         label: (ctx) => `${ctx.label}: ${ctx.raw}`
+        //                     }
+        //                 }
+        //             },
+        //             scales: {
+        //                 x: {
+        //                     beginAtZero: true,
+        //                     ticks: { precision: 0 }
+        //                 }
+        //             }
+        //         }
+        //     });
+        // }
+
+        // Gráfico 2: Health Score (doughnut) - MANTÉM CORES ORIGINAIS
+
+        function createChartHealthScore() {
+            const healthCount = countByField('health_score');
+            const labels = Object.keys(healthCount);
+            const data = Object.values(healthCount);
+
+            // 🎨 Cores fixas por classificação de risco
+            const coresHealth = {
+                "Safe": "#1CFF84",        // Verde neon
+                "Care": "#FFE647",        // Amarelo alerta
+                "Danger": "#dc2626",      // Vermelho forte
+                "Novo Cliente": "#38bdf8",// Azul neon
+                "Default": "#9ca3af"      // Cinza fallback
+            };
+
+            // Retorna cor correspondente para cada label
+            const backgroundColors = labels.map(score => coresHealth[score] || coresHealth["Default"]);
+
+            const ctx = document.getElementById('chart-health').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: backgroundColors,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${ctx.raw}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // function createChartHealthScore() {
+        //     const healthCount = countByField('health_score');
+        //     const labels = Object.keys(healthCount);
+        //     const data = Object.values(healthCount);
+
+        //     const ctx = document.getElementById('chart-health').getContext('2d');
+        //     new Chart(ctx, {
+        //         type: 'doughnut',
+        //         data: {
+        //             labels,
+        //             datasets: [{
+        //                 data,
+        //                 backgroundColor: ['#FF8A8A', '#FF5C5C',  '#FF2E2E', '#dc2626']
+        //             }]
+        //         },
+        //         options: {
+        //             responsive: true,
+        //             maintainAspectRatio: false,
+        //             plugins: {
+        //                 legend: { position: 'bottom' }
+        //             }
+        //         }
+        //     });
+        // }
+
+        // Gráfico 3: Step (V0–V4) (bar) - VERMELHO
+        function createChartStep() {
+            const stepCount = countByField('step');
+            const order = ['V0', 'V1', 'V2', 'V3', 'V4'];
+
+            const labels = order.filter(step => stepCount[step] !== undefined);
+            const data = labels.map(step => stepCount[step]);
+
+            const ctx = document.getElementById('chart-step').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Leads por Step',
+                        data,
+                        backgroundColor: '#dc2626'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 4: Leads por dia (usando data_insercao) - VERMELHO
+        function createChartLeadsPorDia() {
+            const porDia = dados.reduce((acc, { data_insercao }) => {
+                if (!data_insercao) return acc;
+                const key = data_insercao; // já vem como "DD-MM-YYYY"
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+
+            // Ordena pelos próprios dias, convertendo para Date
+            const labelsBrutas = Object.keys(porDia);
+            const labelsOrdenadas = labelsBrutas.sort((a, b) => {
+                return parseDataInsercaoToDate(a) - parseDataInsercaoToDate(b);
+            });
+
+            const data = labelsOrdenadas.map(d => porDia[d]);
+
+            // Opcional: trocar "-" por "/" na exibição
+            const labelsExibicao = labelsOrdenadas.map(d => d.replace(/-/g, '/'));
+
+            const ctx = document.getElementById('chart-leads-dia').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labelsExibicao,
+                    datasets: [{
+                        label: 'Leads por dia',
+                        data,
+                        fill: false,
+                        borderColor: '#dc2626',
+                        tension: 0.3,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 5: Distribuição por Faturamento (bar, ordenado do maior pro menor) - VERMELHO
+        function createChartFaturamento() {
+            const fatCount = countByField('faturamento');
+
+            // Transformar em array, ordenar do maior para o menor e separar labels/data
+            const sortedEntries = Object.entries(fatCount).sort((a, b) => b[1] - a[1]);
+            const labels = sortedEntries.map(entry => entry[0]); // faixa de faturamento
+            const data = sortedEntries.map(entry => entry[1]);   // quantidade
+
+            const ctx = document.getElementById('chart-faturamento').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Leads por faixa de faturamento',
+                        data,
+                        backgroundColor: '#dc2626',
+                        tension: 0.3,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${ctx.raw}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Ranking de quem preencheu (somente leads Aptos) em formato de lista/pódio
+        function createRankingPreenchedoresList() {
+            const container = document.getElementById('ranking-preenchedores');
+
+            const aptos = dados.filter(x => x.status === 'Apto');
+
+            const porEmail = aptos.reduce((acc, cur) => {
+                const key = cur.email_preenchedor?.trim() || "Não informado";
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+
+            const ranking = Object.entries(porEmail)
+                .sort((a,b) => b[1] - a[1]);
+
+            if (ranking.length === 0) {
+                container.innerHTML = `<span style="font-size:0.8rem;color:var(--text-muted);">Nenhum lead apto encontrado.</span>`;
+                return;
+            }
+
+            container.innerHTML = ranking.map((item, i) => {
+                const medal =
+                    i === 0 ? "🥇" :
+                    i === 1 ? "🥈" :
+                    i === 2 ? "🥉" : "🏅";
+
+                return `
+                    <div class="rank-item">
+                        <span class="rank-pos">${medal}</span>
+                        <span class="rank-email">${item[0]}</span>
+                        <span class="rank-score">${item[1]}</span>
+                    </div>`;
+            }).join("");
+        }
+
+        // Tabela
+        function createTable() {
+            const tabela = document.getElementById('tabela-clientes');
+            const tbody = tabela.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            dados.forEach(item => {
+                const tr = document.createElement('tr');
+
+                const tdStatus = document.createElement('td');
+                tdStatus.textContent = item.status;
+                tr.appendChild(tdStatus);
+
+                const tdNome = document.createElement('td');
+                tdNome.textContent = item.nome_do_cliente;
+                tr.appendChild(tdNome);
+
+                const tdFaturamento = document.createElement('td');
+                tdFaturamento.textContent = item.faturamento;
+                tr.appendChild(tdFaturamento);
+
+                const tdTicket = document.createElement('td');
+                tdTicket.textContent = item.ticket_medio;
+                tr.appendChild(tdTicket);
+
+                const tdStep = document.createElement('td');
+                tdStep.textContent = item.step;
+                tr.appendChild(tdStep);
+
+                const tdHealth = document.createElement('td');
+                tdHealth.textContent = item.health_score;
+                tr.appendChild(tdHealth);
+
+                const tdEmpFam = document.createElement('td');
+                tdEmpFam.textContent = item.empresa_familiar;
+                tr.appendChild(tdEmpFam);
+
+                const tdEmail = document.createElement('td');
+                tdEmail.textContent = item.email_preenchedor || 'Não informado';
+                tr.appendChild(tdEmail);
+
+                const tdDataInsercao = document.createElement('td');
+                tdDataInsercao.textContent = item.data_insercao
+                    ? item.data_insercao.replace(/-/g, '/')
+                    : 'Não informado';
+                tr.appendChild(tdDataInsercao);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Inicia tudo
+        loadData();
+    </script>
+
+</body>
+</html>

@@ -1,8 +1,20 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='css/form_style.css') }}">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar de Variável - Olympo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/form_style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/radar-variavel/radar-bg.png') }}">
+</head>
+<body>
 
 <div class="page-center">
     <div class="form-card">
-        <img src="{{ url_for('static', filename='images/logo-radar.png') }}" class="logo" alt="logo">
+        <img src="{{ url_for('static', filename='images/radar-variavel/radar-bg.png') }}" class="logo" alt="logo">
+
+        <h1>Radar de Variável</h1>
+        <h2 class="muted">Classificação de Leads</h2>
         <!-- <h2>Radar de Variável</h2> -->
 
         <form method="POST">
@@ -54,13 +66,15 @@
 
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector("form");
-    const loading = document.getElementById("loading");
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const loading = document.getElementById("loading");
 
-    form.addEventListener("submit", () => {
-        loading.classList.remove("hidden");
+        form.addEventListener("submit", () => {
+            loading.classList.remove("hidden");
+        });
     });
-});
-</script>
+    </script>
+</body>
+</html>

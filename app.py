@@ -645,13 +645,14 @@ def potencial_crescimento():
 #         else:
 #             resultado = "Não Apto"
 
-#         return render_template("resultado_classificacao.html",
+#         return render_template("resultado.html",
 #                                respostas=respostas,
 #                                resultado=resultado,
 #                                pontos=pontos)
 
-#     return render_template("classificacao_form.html", criterios=criterios)
+#     return render_template("index.html", criterios=criterios)
 
+## RADAR DE VARIÁVEL
 @app.route('/radar-de-variavel', methods=['GET', 'POST'])
 def classificacao():
 
@@ -717,7 +718,7 @@ def classificacao():
                 ## FIM TESTE
                 rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
                 return render_template(
-                    "olympo/ferramentas/radar-de-variavel/resultado_classificacao.html",
+                    "olympo/ferramentas/radar-de-variavel/resultado.html",
                     respostas=respostas,
                     resultado=resultado,
                     pontos="Forçado por regra",
@@ -775,19 +776,26 @@ def classificacao():
         ## FIM TESTE        
         rq.post(url = "https://n8n.v4lisboatech.com.br/webhook/analise/registrar-forms", json = respostas)
 
-        return render_template("olympo/ferramentas/radar-de-variavel/resultado_classificacao.html",
+        return render_template("olympo/ferramentas/radar-de-variavel/resultado.html",
                                 respostas=respostas,
                                 resultado=resultado,
                                 pontos=pontos,
                                 analise_ia=analise_ia.json()[0]  # deve ser um dict, não string
                             )
 
-    return render_template("olympo/ferramentas/radar-de-variavel/a.html", criterios=criterios)
+    return render_template("olympo/ferramentas/radar-de-variavel/index.html", criterios=criterios)
 
+
+@app.route('/radar-de-variavel/dashboard')
+def dashboard_radar():
+    return render_template("olympo/ferramentas/radar-de-variavel/dashboard.html")
+
+## APRESENTAÇÃO
 @app.route('/apresentacao')
 def apresentacao():
     return render_template("olympo/apresentacao/apresentacao.html")
 
+## DASHBOARD CLIENTES
 @app.route('/dashboards/rica/campanha/natal-2025')
 def dashboard_rica():
     # DADOS N8N
